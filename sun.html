@@ -1,96 +1,75 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  </head>
-  <script>
-    AFRAME.registerComponent('ar-hit-test', {
-			init: function () {
-				this.xrHitTestSource = null;
-				this.viewerSpace = null;
-				this.refSpace = null;
-
-				this.el.sceneEl.renderer.xr.addEventListener('sessionend', (ev) => {
-					this.viewerSpace = null;
-					this.refSpace = null;
-					this.xrHitTestSource = null;
-				});
-				this.el.sceneEl.renderer.xr.addEventListener('sessionstart', (ev) => {
-					let session = this.el.sceneEl.renderer.xr.getSession();
-
-					let element = this.el;
-					session.addEventListener('select', function () {
-						let position = element.getAttribute('position');
-
-						document.getElementById('dino').setAttribute('position', position);
-						document.getElementById('light').setAttribute('position', {
-							x: (position.x - 2),
-							y: (position.y + 4),
-							z: (position.z + 2)
-						});
-					});
-
-					session.requestReferenceSpace('viewer').then((space) => {
-						this.viewerSpace = space;
-						session.requestHitTestSource({space: this.viewerSpace})
-								.then((hitTestSource) => {
-									this.xrHitTestSource = hitTestSource;
-								});
-					});
-
-					session.requestReferenceSpace('local-floor').then((space) => {
-						this.refSpace = space;
-					});
-				});
-			},
-			tick: function () {
-				if (this.el.sceneEl.is('ar-mode')) {
-					if (!this.viewerSpace) return;
-
-					let frame = this.el.sceneEl.frame;
-					let xrViewerPose = frame.getViewerPose(this.refSpace);
-
-					if (this.xrHitTestSource && xrViewerPose) {
-						let hitTestResults = frame.getHitTestResults(this.xrHitTestSource);
-						if (hitTestResults.length > 0) {
-							let pose = hitTestResults[0].getPose(this.refSpace);
-
-							let inputMat = new THREE.Matrix4();
-							inputMat.fromArray(pose.transform.matrix);
-
-							let position = new THREE.Vector3();
-							position.setFromMatrixPosition(inputMat);
-							this.el.setAttribute('position', position);
-						}
-					}
-				}
-			}
-		});
-  </script>
-  <script>
-      AFRAME.registerComponent('exit-ar-button', {
-        schema: {
-            element: {type: 'selector'}
-        },
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>sun</title>
+  <script src="https://aframe.io/releases/1.1.0/aframe.min.js"></script>
+  <script src="https://ada.is/basketball-demo/ar-components.js"></script>
+　<script>
+    AFRAME.registerComponent('hide-in-ar-mode', {
+        // Set this object invisible while in AR mode.
+        // TODO: could this be replaced with bind="visible: !ar-mode"
+        // with https://www.npmjs.com/package/aframe-state-component ?
         init: function () {
-          this.data.element.addEventListener('click', ev => {
-              this.el.sceneEl.renderer.xr.getSession().end();
+          this.el.sceneEl.addEventListener('enter-vr', (ev) => {
+            if (this.el.sceneEl.is('ar-mode')) {
+              this.el.setAttribute('visible', false);
+            }
+          });
+          this.el.sceneEl.addEventListener('exit-vr', (ev) => {
+            this.el.setAttribute('visible', true);
           });
         }
-      });
-    </script>
-  <body>
-     <div id="overlay">
-      <span id="greeting">
-        Hi, I'm the DOM Overlay
-      </span>
-      <button id="exit-ar">Exit AR</button>
-    </div>
-    <a-scene webxr="requiredFeatures: hit-test,local-floor;
-                optionalFeatures: dom-overlay,unbounded;
-                overlayElement: #overlay;">
-      <a-entity exit-ar-button="element: #exit-ar"></a-entity>
-	    
-    </a-scene>
-  </body>
+      })
+  </script>
+  <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
+</head>
+<body>
+  <a-scene webxr="optionalFeatures: hit-test, dom-overlay; overlayElement:#overlay;" >
+  <a-plane
+ rotation="-90 0 0"
+ width="0.2"
+ height="0.2"
+ src="./arrow.png"
+ material="transparent:true;"
+></a-plane>
+<a-entity ar-hit-test="doHitTest:false" visible="false">
+Reticle HTML goes here ...
+</a-entity>
+<a-entity id="hoop" rotation="90 0 0" position="0 2 -1.8"> 
+    <a-torus scale="0.6 0.6 0.6" position="0 0.173 -0.1" color="#43A367" radius="0.25" radius-tubular="0.005"></a-torus>
+    <a-plane
+     scale="0.6 0.6 0.6"
+     position="0 0 -0.3"
+     rotation="-90 0 0"
+     width="0.9"
+     height="0.9"
+     material="transparent: true; side: double;"
+     src="./backboard.png"
+    ></a-plane>
+    <a-cone scale="0.6 0.6 0.6" position="0 0.173 -0.010" color="tomato" radius-bottom="0.25" radius-top="0.3" material="side: double; opacity:0.5; transparent: true;" geometry="height: 0.29; openEnded: true" rotation="90 0 0"></a-cone>
+</a-entity>
+<a-sphere id="ball" dynamic-body radius="0.1" color="orange" position="0.1 2.36 -1.5"></a-sphere>
+<a-plane
+    rotation="-90 0 0"
+    width="20"
+    height="20"
+    color="#43A367"
+    static-body
+    hide-in-ar-mode
+></a-plane>
+<a-torus scale="0.6 0.6 0.6" static-body="shape: mesh;" position="0 0.173 -0.1" visible="false" radius="0.27" radius-tubular="0.02" geometry="radius: 0.29; segmentsRadial: 5; segmentsTubular: 12">
+</a-torus>
+<div id="overlay" class="container">
+  <h1>Welcome To Basketball</h1>
+  <section class="overlay-content">
+    <p id="instructions">Place the basket along a wall</p>
+  </section>
+  <div style="display: flex; justify-content: space-between; align-self: stretch;">
+    <button id="go-button">Ready to Play!</button>
+    <button id="exit-button">Stop AR</button>
+  </div>
+</div>	 
+</body>
 </html>
