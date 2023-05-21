@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <title>太陽AR表示</title>
+  </head>
+  <body>
+  <script type="module"
+      src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js">
+  </script>
+    
+    <model-viewer  
+    ar
+    alt=""
+    src="" 
+    ios-src="" 
+    style="width:800px;height:1000px;"                  
+                  
+                  background-color="#ffffff"
+                  shadow-intensity="0.7"
+                  camera-controls
+                  interaction-prompt="auto"
+                  auto-rotate ar magic-leap>
+                  
+    
+    </model-viewer>
+  </body>
+</html>
