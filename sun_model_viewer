@@ -11,9 +11,9 @@
     
     <model-viewer  
     ar
-    alt=""
-    src="" 
-    ios-src="" 
+    alt="太陽3d"
+    src="太陽.gld" 
+    ios-src="太陽usdz" 
     style="width:800px;height:1000px;"                  
                   
                   background-color="#ffffff"
